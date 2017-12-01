@@ -27,7 +27,9 @@ $this->registerJs($script, \yii\web\View::POS_END);
             'enablePushState' => false
         ]); ?>
         <ul class="media-list messenger-box" id="messenger-box">
-            <?php foreach ($theme->dialog as $message): ?>
+            <?php $user_from = $theme->user_from ?>
+
+            <?php foreach ($theme->getDialog()->orderBy('created_at')->all() as $message): ?>
                 <li class="media">
                     <div class="media-body">
                         <div class="media">
@@ -41,8 +43,17 @@ $this->registerJs($script, \yii\web\View::POS_END);
                                 <br>
                                 <small class="text-muted">
                                     <?= $message->answeredBy->username; ?> |
-                                    <?= Yii::$app->formatter->asDateTime($message->answeredBy->created_at); ?>
+                                    <?= Yii::$app->formatter->asDateTime($message->created_at); ?>
+                                    <br>
+                                    <?php if($message->answered_by == $user_from && $message->status): ?>
+                                        <?= $message->status->translationModel->title ?>
+                                        <?php if($message->status_at): ?>
+                                            ->
+                                            <?= Yii::$app->formatter->asDateTime($message->status_at); ?>
+                                        <?php endif;?>
+                                    <?php endif; ?>
                                 </small>
+
                                 <hr>
                             </div>
                         </div>
@@ -54,4 +65,15 @@ $this->registerJs($script, \yii\web\View::POS_END);
         <?php Pjax::end(); ?>
     </div>
 </div>
-<?= $this->render('dialog_box_form', ['theme' => $theme]); ?>
+<?php if($theme->is_closed === false): ?>
+    <div class="dialog-form-block">
+        <?= $this->render('dialog_box_form', ['theme' => $theme]); ?>
+        <?= Html::tag('div', Yii::t('app', 'Закрыть тикет'), [
+            'class' => 'close-ticket btn btn-success col-sm-4',
+            'data-themeid' => $theme->id,
+            'data-toggle' => 'modal',
+            'data-target' => '.bs-ticket-form-modal-sm',
+            'style' => '{display: inline-block;}'
+        ]) ?>
+    </div>
+<?php endif; ?>

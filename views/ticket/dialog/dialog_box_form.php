@@ -33,7 +33,7 @@ JS;
 //$this->registerJs($script, \yii\web\View::POS_END);
 
 ?>
-<div class="row current-chat-footer">
+<div class="row current-chat-footer" style="display: inline-block;">
     <div class="panel-footer">
         <?php $form = ActiveForm::begin([
             'id' => 'ticket-message-form',
@@ -50,7 +50,7 @@ JS;
         <?= Html::submitButton(
             Yii::t('app', 'Send'),
             [
-                'class' => 'btn btn-success col-sm-2',
+                'class' => 'btn btn-success col-sm-10',
                 'type' => 'button'
             ]); ?>
         <?php ActiveForm::end(); ?>
