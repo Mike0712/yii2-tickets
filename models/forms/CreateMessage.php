@@ -14,7 +14,7 @@ class CreateMessage extends Model
     public $messageId;
     public $message;
     public $dialogId;
-    public $isNew = 0;
+    public $isNew = 1;
     public $statusId;
     public $statusAt;
 
@@ -27,6 +27,7 @@ class CreateMessage extends Model
     {
         $rules = [
             ['messageId', 'integer'],
+            ['message', 'required'],
             ['message', 'safe'],
             ['dialogId', 'integer'],
             ['isNew', 'boolean']
@@ -43,8 +44,8 @@ class CreateMessage extends Model
         $model->theme_id = $this->dialogId;
         $model->is_new = $this->isNew;
         $model->message = $this->message;
-        $model->status_id = $this->statusId;
-        $model->status_at = $this->statusAt;
+        $model->status_id = CreateTicket::UNREAD_MESSAGE;
+        $model->status_at = date('Y-m-d h:i:s');
 
         if ($model->validate())
         {
