@@ -3,13 +3,10 @@
 namespace rgen3\tickets\controllers;
 
 use common\models\User;
-use rgen3\tickets\models\forms\CreateMessage;
 use rgen3\tickets\models\forms\CreateTicket;
-use rgen3\tickets\models\forms\UpdateTicket;
+use rgen3\tickets\models\forms\TicketManager;
 use rgen3\tickets\models\search\Dialog;
-use rgen3\tickets\models\TicketTheme;
 use rgen3\tickets\Module;
-use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\Response;
 
@@ -22,8 +19,8 @@ class Message extends Controller
 
     public function actionCreate()
     {
-        $model = new CreateTicket(\Yii::$app->user);
-        $model->load(\Yii::$app->request->post());
+        $ticketManager = new TicketManager(\Yii::$app->user);
+        $model = $ticketManager->create(\Yii::$app->request->post());
 
         if ($model->validate())
         {
@@ -37,7 +34,7 @@ class Message extends Controller
 
     public function actionDialog($id)
     {
-        $model = new CreateTicket(\Yii::$app->user);
+        $model = (new TicketManager(\Yii::$app->user))->create([]);
         $searchModel = new Dialog();
         $params = [
             'Dialog' =>
@@ -76,9 +73,10 @@ class Message extends Controller
 
     public function actionAnswer()
     {
-        $model = new CreateMessage();
-        $model->load(\Yii::$app->request->post());
-        $model->create();
+        $post = \Yii::$app->request->post();
+        $ticketManager = new TicketManager(\Yii::$app->user);
+        $model = $ticketManager->update($post['CreateMessage']['dialogId'], ['action' => 'answer', 'params' => $post, 'res' => true]);
+
         if (!\Yii::$app->request->isAjax)
         {
             return $this->redirect(["/ticket/dialog/{$model->dialogId}"]);
@@ -96,27 +94,20 @@ class Message extends Controller
                 return 'Нет формы';
             }
             $themeId = $post['theme_id'];
-            $theme = TicketTheme::findOne($themeId);
+            $ticketManager = new TicketManager(\Yii::$app->user);
+            $data = $ticketManager->prepareUpdate($themeId, ['prepare' => 'close']);
 
-            $model = new UpdateTicket(\Yii::$app->user);
-
-            return $this->render('/ticket/parts/form_close', ['theme' => $theme, 'model' => $model]);
+            return $this->render('/ticket/parts/form_close', ['theme' => $data['theme'], 'model' => $data['model']]);
         }
     }
 
     public function actionClose()
     {
-        $model = new UpdateTicket(\Yii::$app->user);
         $post = \Yii::$app->request->post();
+        $ticketId = $post['UpdateTicket']['ticketId'];
+        $ticketManager = new TicketManager(\Yii::$app->user);
 
-        if (isset($post['UpdateTicket']['ticketId'])){
-            $model->themeId = $post['UpdateTicket']['ticketId'];
-        }
-        if($model->update(['action' => 'close'])){
-            return true;
-        }
-
-        return false;
+        return $ticketManager->update($ticketId, ['action' => 'close']);
     }
 
     public function actionTakeRowForClosed()

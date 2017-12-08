@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'Created' => 'Создано',
     'User from' => 'От пользователя',
     'Assigned to' => 'Исполнитель',
     'Subject' => 'Тема',

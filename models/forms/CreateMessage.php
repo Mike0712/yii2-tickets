@@ -44,7 +44,7 @@ class CreateMessage extends Model
         $model->theme_id = $this->dialogId;
         $model->is_new = $this->isNew;
         $model->message = $this->message;
-        $model->status_id = CreateTicket::UNREAD_MESSAGE;
+        $model->status_id = TicketManager::UNREAD_MESSAGE;
         $model->status_at = date('Y-m-d h:i:s');
 
         if ($model->validate())

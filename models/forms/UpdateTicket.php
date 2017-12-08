@@ -8,10 +8,16 @@ use rgen3\tickets\models\TicketTheme;
 use rgen3\tickets\models\TicketMessage;
 use yii\base\Model;
 
-class UpdateTicket extends CreateTicket
+class UpdateTicket extends Model
 {
     private $modelForAnswer;
+    private $user;
     public $themeId = null;
+
+    public function setUser($user)
+    {
+        $this->user = $user;
+    }
 
     private function setModelForAnswer($id)
     {
@@ -28,15 +34,33 @@ class UpdateTicket extends CreateTicket
 
     public function update(array $action)
     {
-        $ticketTheme = TicketTheme::findOne($this->themeId);
-        if (!$this->checkRights($ticketTheme)){
+        if (!$this->checkRights($this->modelForAnswer)){
             die('access denied');
         }
 
-        if($action['action'] === 'close')
+        if ($action['action'] === 'close')
         {
-            $ticketTheme->is_closed = true;
-            $ticketTheme->save();
+            $this->modelForAnswer->is_closed = true;
+            $this->modelForAnswer->save();
+
+            return true;
+        }
+
+        if ($action['action'] === 'answer')
+        {
+            $model = new CreateMessage();
+            $model->load($action['params']);
+            if($model->create()){
+                $this->setStatusOfMessages('answer');
+            }
+            return $model;
+        }
+
+        if($action['action'] === 'setStatusOfMessage')
+        {
+            $operation = $action['operation'];
+            $this->setStatusOfMessages($operation);
+
             return true;
         }
 
@@ -58,20 +82,20 @@ class UpdateTicket extends CreateTicket
         return false;
     }
 
-    public function setStatusOfMessages(string $operation)
+    private function setStatusOfMessages(string $operation)
     {
         $sender_id = $this->modelForAnswer->sender->id;
         $messages = $this->modelForAnswer->getUnreadMessages()->where(['answered_by' => $sender_id])->all();
 
         array_map(function (TicketMessage $message) use ($operation){
-            if ($operation == 'read' && $message->status_id == self::UNREAD_MESSAGE){
+            if ($operation == 'read' && $message->status_id == TicketManager::UNREAD_MESSAGE){
                 $message->is_new = false;
-                $message->status_id = self::READ_MESSAGE;
+                $message->status_id = TicketManager::READ_MESSAGE;
                 $message->status_at = date('Y-m-d h:i:s');
                 $message->save();
             }
             if ($operation == 'answer' && $message->status_id == 2){
-                $message->status_id = self::ANSWER_MESSAGE;
+                $message->status_id = TicketManager::ANSWER_MESSAGE;
                 $message->status_at = date('Y-m-d h:i:s');
                 $message->save();
             }

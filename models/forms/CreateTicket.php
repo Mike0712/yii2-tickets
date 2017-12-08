@@ -3,7 +3,6 @@
 namespace rgen3\tickets\models\forms;
 
 use yii\web\User;
-use rgen3\tickets\models\TicketMessage;
 use rgen3\tickets\models\TicketTheme;
 use rgen3\tickets\Module;
 use rgen3\tickets\traits\UserFrom;
@@ -14,23 +13,12 @@ class CreateTicket extends Model
 {
     use UserFrom;
 
-    const UNREAD_MESSAGE = 1;
-    const READ_MESSAGE = 2;
-    const ANSWER_MESSAGE = 3;
-
     public $dialogId;
     public $subject;
     public $message;
     public $status;
 
     private $assignedTo;
-    protected $user;
-
-    public function __construct(User $user, array $config = [])
-    {
-        $this->user = $user;
-        parent::__construct($config);
-    }
 
     public function init()
     {
@@ -39,9 +27,9 @@ class CreateTicket extends Model
         $this->setAssignedTo();
     }
 
-    public function setAssignedTo()
+    private function setAssignedTo()
     {
-        $user_id = $this->user->id;
+        $user_id = $this->userFrom;
         $user = \common\models\User::findOne($user_id);
         $manager_id = $user->manager_id;
 
