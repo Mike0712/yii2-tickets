@@ -1,17 +1,13 @@
 <?php
-
 use \rgen3\tickets\models\forms\CreateMessage;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
-
 $model = new \rgen3\tickets\models\forms\CreateMessage();
-
 $script = <<< JS
     jQuery('body').on('submit', '#ticket-message-form', function ()
     {
         var form = $('#ticket-message-form'),
             data = form.serialize();
-
         jQuery.ajax({
             url : '/ticket/answer',
             type: 'POST',
@@ -29,9 +25,7 @@ $script = <<< JS
         return false;
     });
 JS;
-
 //$this->registerJs($script, \yii\web\View::POS_END);
-
 ?>
 <?php $form = ActiveForm::begin([
     'id' => 'ticket-message-form',
@@ -51,4 +45,11 @@ JS;
         'class' => 'btn btn-success',
         'type' => 'button'
     ]); ?>
+<?= Html::tag('div', Yii::t('app', 'Закрыть тикет'), [
+    'class' => 'close-ticket btn btn-danger col-sm-4',
+    'data-themeid' => $theme->id,
+    'data-toggle' => 'modal',
+    'data-target' => '.bs-ticket-form-modal-sm',
+    'style' => 'position: absolute; right: 3%;'
+]) ?>
 <?php ActiveForm::end(); ?>

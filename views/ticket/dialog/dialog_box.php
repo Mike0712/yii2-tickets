@@ -1,14 +1,10 @@
 <?php
-
 use yii\widgets\Pjax;
 use yii\helpers\Html;
-
 $script = <<< JS
     var messengerBox = document.getElementById("messenger-box");
     messengerBox.scrollTop = messengerBox.scrollHeight;
 JS;
-
-
 $this->registerJs($script, \yii\web\View::POS_END);
 ?>
 <?php Pjax::begin([
@@ -17,9 +13,9 @@ $this->registerJs($script, \yii\web\View::POS_END);
 ]); ?>
 
     <ul class="media-list messenger-box inbox-widget nicescroll" id="messenger-box">
+        <?php $user_from = $theme->user_from ?>
 
-
-        <?php foreach ($theme->dialog as $message): ?>
+        <?php foreach ($theme->getDialog()->orderBy('created_at')->all() as $message): ?>
             <li class="media">
                 <div class="media-avatar" style="background-image: url(<?= \rgen3\tickets\Module::$defaultUserImage ?>)"></div>
                 <div class="media-body">
@@ -37,6 +33,13 @@ $this->registerJs($script, \yii\web\View::POS_END);
 
                             <?= Yii::$app->formatter->asDateTime($message->answeredBy->created_at); ?>
 
+                            <?php if($message->answered_by == $user_from && $message->status): ?>
+                                <?= $message->status->translationModel->title ?>
+                                <?php if($message->status_at): ?>
+                                    ->
+                                    <?= Yii::$app->formatter->asDateTime($message->status_at); ?>
+                                <?php endif;?>
+                            <?php endif; ?>
                         </span>
                     </div>
                 </div>
@@ -48,4 +51,6 @@ $this->registerJs($script, \yii\web\View::POS_END);
 
 <?php Pjax::end(); ?>
 
-<?= $this->render('dialog_box_form', ['theme' => $theme]); ?>
+<?php if($theme->is_closed === false): ?>
+    <?= $this->render('dialog_box_form', ['theme' => $theme]); ?>
+<?php endif; ?>

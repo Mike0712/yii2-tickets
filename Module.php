@@ -3,6 +3,7 @@
 namespace rgen3\tickets;
 
 use common\models\User;
+use yii\i18n\PhpMessageSource;
 
 class Module extends \yii\base\Module
 {
@@ -24,11 +25,10 @@ class Module extends \yii\base\Module
 
     public function registerTranslation()
     {
-
         \Yii::$app->i18n->translations['rgen3/tickets/*'] = [
             'class' => PhpMessageSource::class,
-            'sourceLanguage' => \Yii::$app->sourceLanguage,
-            'basePath' => '@blog/messages',
+            'sourceLanguage' => 'ru',
+            'basePath' => '@tickets/messages',
             'fileMap' => [
                 'rgen3/tickets/admin' => 'admin.php'
             ]

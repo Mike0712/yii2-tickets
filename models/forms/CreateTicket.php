@@ -2,8 +2,7 @@
 
 namespace rgen3\tickets\models\forms;
 
-use common\models\User;
-use rgen3\tickets\models\TicketMessage;
+use yii\web\User;
 use rgen3\tickets\models\TicketTheme;
 use rgen3\tickets\Module;
 use rgen3\tickets\traits\UserFrom;
@@ -28,9 +27,17 @@ class CreateTicket extends Model
         $this->setAssignedTo();
     }
 
-    public function setAssignedTo()
+    private function setAssignedTo()
     {
-        $this->assignedTo = 1;
+        $user_id = $this->userFrom;
+        $user = \common\models\User::findOne($user_id);
+        $manager_id = $user->manager_id;
+
+        if ($manager_id){
+            $this->assignedTo = $manager_id;
+        }else{
+            $this->assignedTo = $user->manager->id;
+        }
     }
 
     public function getAssignedTo()
@@ -87,7 +94,6 @@ class CreateTicket extends Model
 
         $ticketMessage->message = $this->message;
         $ticketMessage->dialogId = $ticketThemes->id;
-        $ticketMessage->isNew = 0;
 
         $ticketMessage->create();
 
